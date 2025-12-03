@@ -101,6 +101,7 @@ https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct/tree/main
 - Оптимизация промптов для более точного определения объектов
 
 📁 **Структура проекта**
+```text
 desktop-object-detector/
 ├── API_LM_studio/
 │   ├── Localhost_LM_studio_PIL_image.py
@@ -129,6 +130,7 @@ desktop-object-detector/
 ├── main_owlv2_lmstudio.py
 ├── requirements.txt
 └── README.md
+```
 
 ## 🚀 Дорожная карта развития
 
