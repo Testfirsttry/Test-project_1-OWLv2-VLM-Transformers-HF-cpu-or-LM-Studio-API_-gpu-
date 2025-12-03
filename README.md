@@ -45,18 +45,18 @@ Intel Core i5 10-го поколения или новее
 NVIDIA/AMD GPU с 4+ ГБ VRAM (для GPU версии)
 
 ## Подготовка окружения
-# 1. Создание Conda окружения с Python 3.13 (на момент использования 3.13.9)
+### 1. Создание Conda окружения с Python 3.13 (на момент использования 3.13.9)
 conda create -n test_1 python=3.13
 conda activate test_1
 
-# 2. Установка зависимостей (основной вариант)
+### 2. Установка зависимостей (основной вариант)
 pip install torch pillow requests transformers 
 pip install matplotlib torchvision accelerate
 
-# 3. (опционально) установка остальных зависимостей
+### 3. (опционально) установка остальных зависимостей
 pip install -r requirements.txt
 
-# 4. Загрузка модели **OWLv2**
+### 4. Загрузка модели **OWLv2**
 1. перейти  https://huggingface.co/google/owlv2-large-patch14-finetuned
 2. перейти к файлам https://huggingface.co/google/owlv2-large-patch14-finetuned/tree/main
 3. Вариант A: скачать вручную
@@ -67,7 +67,7 @@ pip install -r requirements.txt
    main_owlv2_Transformers.py (для использования с Transformers)
    main_owlv2_API_LM_studio.py (для использования с LM_Studio api)
    
-# 5.1 ИЛИ Загрузка модели Hugging Face 
+### 5.1 ИЛИ Загрузка модели Hugging Face 
 1. аналогично, загрузке OWLv2, но по другому 
 https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct/tree/main
 2. перенести скачанные файлы в папку "owlv2_large_patch14 ensemble" (без подпапок)
@@ -75,7 +75,7 @@ https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct/tree/main
    Qwen_4_2.py (для теста на любых изображениях - можно подправить в путях)
    main_owlv2_Transformers.py (для использования с новыми скриншотами)
 
-# 5.2 ИЛИ Установка LM Studio (GPU / CPU)
+### 5.2 ИЛИ Установка LM Studio (GPU / CPU)
 1. Скачать LM Studio с (https://lmstudio.ai/)
 2. В поиске моделей найдите "Qwen3-VL-8B-Instruct"
 3. Нажмите Download → 8-bit quantization (q8) (или q6)
