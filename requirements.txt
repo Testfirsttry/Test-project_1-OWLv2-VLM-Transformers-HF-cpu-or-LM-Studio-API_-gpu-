@@ -1,0 +1,54 @@
+# Точные версии для воспроизводимости проекта
+
+# Основные зависимости для ML
+torch==2.9.1
+torchvision==0.24.1
+transformers==4.57.3
+accelerate==1.12.0
+safetensors==0.7.0
+tokenizers==0.22.1
+
+# Работа с изображениями
+pillow==12.0.0
+matplotlib==3.10.7
+numpy==2.3.5
+
+# Веб и API
+requests==2.32.5
+urllib3==2.5.0
+idna==3.11
+charset-normalizer==3.4.4
+certifi==2025.11.12
+
+# Вспомогательные библиотеки
+huggingface-hub==0.36.0
+filelock==3.20.0
+fsspec==2025.10.0
+packaging==25.0
+regex==2025.11.3
+tqdm==4.67.1
+psutil==7.1.3
+
+# Для работы с конфигурацией
+PyYAML==6.0.3
+
+# Дополнительные зависимости для matplotlib
+contourpy==1.3.3
+cycler==0.12.1
+fonttools==4.61.0
+kiwisolver==1.4.9
+pyparsing==3.2.5
+python-dateutil==2.9.0.post0
+
+# Системные зависимости
+colorama==0.4.6
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.6
+six==1.17.0
+sympy==1.14.0
+typing_extensions==4.15.0
+
+# Для будущей интеграции с PyAutoGUI
+pyautogui==0.9.53
