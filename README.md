@@ -106,20 +106,25 @@ desktop-object-detector/
 ├── API_LM_studio/
 │   ├── Localhost_LM_studio_PIL_image.py
 │   └── Test_image/
+
 ├── image_save/
 │   ├── new1.png    # главный скриншот экрана
 │   ├── left_cropped.png
 │   ├── right_cropped.png
 │   └── Splitting_images_after_owlv2.png
+
 ├── Output_OWLv2/
 │   ├── Выходные изображения от OWLv2
 │   └── 2 * (1080x1080) + 1 * 1920x1080
+
 ├── owlv2_large_patch14_ensemble/
 │   ├── owlv2_5_5.py
 │   └── model_files/
+
 ├── Transformers_Qwen3_VL_4B_Instruct/
 │   ├── Qwen_4_2.py
 │   └── model_files/
+
 ├── main.py                 # Основная точка входа
 ├── main_owlv2_transformers.py
 ├── main_owlv2_lmstudio.py
