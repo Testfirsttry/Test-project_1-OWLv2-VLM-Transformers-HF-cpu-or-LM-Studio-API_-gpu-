@@ -104,32 +104,33 @@ https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct/tree/main
 ```text
 desktop-object-detector/
 ├── API_LM_studio/
-│   ├── Localhost_LM_studio_PIL_image.py
-│   └── Test_image/
-
+│   ├── Localhost_LM_studio_PIL_image.py      # Работа с LM Studio API
+│   │                                          (LM Studio запускать отдельно, port 1234)
+│   └── Test_image/                           # Тестовые изображения
+│
 ├── image_save/
-│   ├── new1.png    # главный скриншот экрана
-│   ├── left_cropped.png
-│   ├── right_cropped.png
-│   └── Splitting_images_after_owlv2.png
-
+│   ├── new1.png                              # Исходный скриншот
+│   ├── left_cropped.png                      # Левая часть (1080x1080)
+│   ├── right_cropped.png                     # Правая часть (1080x1080)
+│   └── Splitting_images_after_owlv2.png      # Визуализация разделения
+│
 ├── Output_OWLv2/
-│   ├── Выходные изображения от OWLv2
-│   └── 2 * (1080x1080) + 1 * 1920x1080
-
+│   ├── Выходные изображения от OWLv2         # 2 изображения с bbox (1080x1080)
+│   ├── cropped_bbox_data.txt                 # Координаты в TXT
+│   └── cropped_bbox_data.json                # Координаты в JSON
+│
 ├── owlv2_large_patch14_ensemble/
-│   ├── owlv2_5_5.py
-│   └── model_files/
-
+│   ├── owlv2_5_5.py                          # Скрипт для OWLv2
+│   └── model_files/                          # Файлы модели (скачать отдельно)
+│
 ├── Transformers_Qwen3_VL_4B_Instruct/
-│   ├── Qwen_4_2.py
-│   └── model_files/
-
-├── main.py                 # Основная точка входа
-├── main_owlv2_transformers.py
-├── main_owlv2_lmstudio.py
-├── requirements.txt
-└── README.md
+│   ├── Qwen_4_2.py                           # Скрипт для Qwen для Transformers
+│   └── model_files/                          # Файлы модели (скачать отдельно)
+│
+├── main_owlv2_transformers.py                # Основной скрипт (для OWLv2 + Transformers)
+├── main_owlv2_lmstudio.py                    # Основной скрипт (для OWLv2 + LM Studio)
+├── requirements.txt                          # Зависимости Python
+└── README.md                                 # Этот файл
 ```
 
 ## 🚀 Дорожная карта развития
