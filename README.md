@@ -15,27 +15,26 @@
 | Метод        |    Устройство   |     Использование Ram/Vram         | Использование    
 |--------------|-----------------|------------------------------------|---------------------------|
 | Transformers |  CPU i5-12400F  |    +-5 ГБ RAM  (+OS used Ram)      | OWLv2 (+-3.5gb disk space)|      
-|                                                                                                 |
 | Transformers |  CPU i5-12400F  |   +- 10-13 ГБ RAM (prompt based)   | Qwen3-VL 4b 16bf          |
 |              |                 |                 (+OS used Ram)     | (+-8gb disk space)        |
-|                                                                                                 |
 | LM Studio API| GPU AMD RX 5700 |   +- 2-3 ГБ RAM (+OS used Ram)     | Qwen3-VL 8b Q6_K_L        |
 |              |                 |     + LM Studio model (7-8 ГБ VRAM)|  (+-8gb disk space)       |
-|                                                                                                 |
 | LM Studio API|  CPU i5-12400F  |    +- 2-3 ГБ RAM (+OS used Ram)    | Qwen3-VL 8b Q6_K_L        |
 |              |                 |   + LM Studio model (7-8 ГБ VRAM)  |                           |
                                             
 **Тесты моделей** (all tests with 1920x1080 image)
-                                Время работы моделей 
-*OWLv2* (Transformers CPU) :         +- 1 минута        (15 секунд 1 итерация prompt)
-*Qwen3-VL 4b* (Transformers CPU):     360 - 400 секунд   (зависит от величины промпта)  
+```text
+                                         Время работы моделей 
+*OWLv2* (Transformers CPU) :            +- 1 минута        (15 секунд 1 итерация prompt)
+*Qwen3-VL 4b* (Transformers CPU):      360 - 400 секунд   (зависит от величины промпта)  
 *Qwen3-VL 4b* (Transformers GPU):      Тест не проводился,Отсуттствует CUDA
 
-*Qwen3-VL 8Q6_K_Lb* (LM Studio CPU):       +- 360 секунд холодный старт (хотя при тестироввнии 50% нагрузка на CPU?),
-*Qwen3-VL 8b Q6_K_L * (LM Studio GPU):       40 - 60 секунд холодный старт + model load time (hdd or ssd),
-                                      2-й старт <= 10 секунд 
+*Qwen3-VL 8Q6_K_Lb* (LM Studio CPU):      +- 360 секунд холодный старт (хотя при тестироввнии 50% нагрузка на CPU?),
+*Qwen3-VL 8b Q6_K_L * (LM Studio GPU):    40 - 60 секунд холодный старт + model load time (hdd or ssd),
+                                          2-й старт <= 10 секунд 
 *Qwen3-VL 4b q8_0* (LM Studio СPU):       +- 160 секунд холодный старт (хотя при тестироввнии 50% нагрузка на CPU?),
 *Qwen3-VL 4b q8_0* (LM Studio GPU):       15 - 30 секунд холодный старт + model load time (hdd or ssd),
+```
 
 **Требования к системе**
 Windows 10/11 (64-bit)
