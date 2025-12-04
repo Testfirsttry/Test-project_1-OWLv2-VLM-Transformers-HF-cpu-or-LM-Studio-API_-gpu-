@@ -166,4 +166,5 @@ qwen3_resilt= main_qwen3(
 qwen3_text=qwen3_resilt["output_qwen3_text"]
 qwen3_Tine_to_run=qwen3_resilt["generation_time"]
 
+print("Время обработки:", qwen3_Tine_to_run)
 print("Позиция после обработки:",qwen3_text)
