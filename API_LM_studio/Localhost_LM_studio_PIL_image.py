@@ -113,10 +113,6 @@ class LMStudioVLM:
                 result = response.json()
                 description = result['choices'][0]['message']['content'].strip()
                 processing_time = time.time() - start_time
-                
-                print(f"✅ Все изображения обработаны за {processing_time:.2f} сек")
-                print(f"📝 Ответ: {description}")
-                
                 return {
                     "success": True,
                     "output_text": description,
@@ -164,8 +160,9 @@ if __name__ == "__main__":
     vlm_result=vlm.describe_multiple_images(image_inputs, prompt)
 
     vlm_status=vlm_result["success"]
-
+    time=vlm_result["processing_time"]
     if vlm_result.get("success"): # cработает если success == True
+        print(f"Время обработки: {time:.2f}")
         print("Позиция после обработки:", vlm_result["output_text"])
     else:
         print("Ошибка:", vlm_result.get("error", "API EROR"))
