@@ -4,9 +4,11 @@
 ## 📋 О проекте
 
 ![left_cropped_optimized_bbox](https://github.com/user-attachments/assets/4d14b787-e464-462c-adce-e35db8c456d1)
+
 Figure 1 - OWLv2 result
 
 ![LMstudio_outpu_CPU_qwen3_vl_4b_Q8t](https://github.com/user-attachments/assets/54106ef2-dff3-4258-8ca6-6d872174d70b)
+
 Figure 2 - LM Studio (CPU Qwen 3 VL 4b Q8_0)
 
 Проект использует каскад из двух нейросетевых моделей:
