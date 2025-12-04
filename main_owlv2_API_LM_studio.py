@@ -62,20 +62,22 @@ OUTPUT_DIR_OWLV2 = PROJECT_ROOT / 'Output_OWLv2'
 from owlv2_large_patch14_ensemble.owlv2_5_5 import main_owl
 
 #массив с результатами после работы owlv2 для каждого фото
+current_id = 1 
 owl_result=[]
 image_set=[left_image_path, right_image_path]
 
 print("Левое и правое изображения\n",image_set,"\n")
 
 for i in range(len(image_set)):
-     owl_result.append(
-          main_owl(
-     model_path= OWLv2_MODEL_PATH,
-     image_path=image_set[i],
-     text_queries=text_queries,
-     output_path=OUTPUT_DIR_OWLV2
-          )
+     result=main_owl(
+          model_path= OWLv2_MODEL_PATH,
+          image_path=image_set[i],
+          text_queries=text_queries,
+          output_path=OUTPUT_DIR_OWLV2,
+          start_id=current_id,
      )
+     owl_result.append(result)
+     current_id += result['detection_count']
 # результаты обработки OWLV2 - 2 словаря [ {} , {} ]
 #owl_visualization_path = owl_result['visualization_path']   # расположение Image файла с bbox
                                                                       #(optimized_bbox.jpg)
@@ -121,8 +123,6 @@ def show_all_parts_with_names(image_parts_with_names, title="Все части �
 # Использование:
 show_all_parts_with_names(all_parts_with_names, "Части с именами")
 
-
-
 text_search_objects=f'''There are photo in front of you - screenshot with positions.
      Answer these questions about the NUMBERED elements:
 
@@ -145,13 +145,10 @@ vlm_result = vlm.describe_multiple_images(
 )
 
 time=vlm_result["processing_time"]
-if vlm_result.get("success"): # cработает если success == True
+
+if vlm_result.get("success"): # Неявная передача значения. cработает если success == True
      print(f"Время обработки: {time:.2f}")
      print("Позиция после обработки:", vlm_result["output_text"])
 else:
      print("Ошибка:", vlm_result.get("error", "API EROR"))
      sys.exit("Eror API LM Studio")   
-
-vlm_Tine_to_run=vlm_result["processing_time"]
-
-
