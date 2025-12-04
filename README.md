@@ -59,6 +59,7 @@ conda activate test_1
 
 ### 2. Установка зависимостей (основной вариант)
 pip install torch pillow requests transformers 
+
 pip install matplotlib torchvision accelerate
 
 ### 3. (опционально) установка остальных зависимостей
