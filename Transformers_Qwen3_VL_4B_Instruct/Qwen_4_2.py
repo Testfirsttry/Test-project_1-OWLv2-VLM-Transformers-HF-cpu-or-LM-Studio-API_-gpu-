@@ -89,9 +89,6 @@ def main_qwen3(model_path, image_path, text_input):
         generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
     )
 
-    print(output_text)
-    print(f"✅ Generation took {inference_time:.2f} seconds")
-
     #словарь для вывода
     return {"output_qwen3_text":output_text,
             "generation_time":inference_time           
@@ -127,3 +124,7 @@ if __name__ == "__main__":
      1: [number]
      2: [number]''' 
     )
+    qwen3_text=qwen3_resilt["output_qwen3_text"]
+    qwen3_Tine_to_run=qwen3_resilt["generation_time"]
+    print("Время обработки:",qwen3_Tine_to_run)
+    print("Позиция после обработки:",qwen3_text)
