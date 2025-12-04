@@ -78,7 +78,7 @@ def get_rich_color(i):
     
     return (r, g, b)
 
-def create_optimized_visualization(image, all_detections_list, output_path):
+def create_optimized_visualization(image, all_detections_list, output_path,start_id=1):
     """Создает оптимизированную визуализацию с улучшенным позиционированием номеров"""
     draw_image = image.copy()
     draw = ImageDraw.Draw(draw_image)
@@ -87,21 +87,24 @@ def create_optimized_visualization(image, all_detections_list, output_path):
     
     # Предварительно вычисляем размеры всех текстов
     text_sizes = {}
-    for i, det in enumerate(all_detections_list, 1):
-        text = str(i)
+    current_id = start_id # передача id - для предотвращения дублирования, при >1 вызове owlv2()
+    for i, det in enumerate(all_detections_list):
+        text = str(current_id)
         text_bbox = draw.textbbox((0, 0), text, font=font_regular)
-        text_sizes[i] = {
+        text_sizes[current_id] = {
             'width': text_bbox[2] - text_bbox[0],
             'height': text_bbox[3] - text_bbox[1]
         }
+        current_id += 1
     
     # Рисуем каждый bbox с оптимально расположенным номером
-    for i, det in enumerate(all_detections_list, 1):
+    current_id = start_id
+    for i, det in enumerate(all_detections_list):
         box = det['box']
         x1, y1, x2, y2 = box
         
         # Генерируем цвет
-        color = get_rich_color(i)
+        color = get_rich_color(current_id)
         
         # Вычисляем отступ и создаем расширенный bbox для отображения
         padding = VISUALIZATION_SETTINGS['fixed_padding']
@@ -116,7 +119,7 @@ def create_optimized_visualization(image, all_detections_list, output_path):
         draw.rectangle(display_box, outline=color, width=VISUALIZATION_SETTINGS["bbox width"])
         
         # Получаем позицию для номера
-        text_size = text_sizes[i]
+        text_size = text_sizes[current_id]
         """
         text_x, text_y = get_number_position(
             box, text_size['width'], text_size['height'],
@@ -139,7 +142,7 @@ def create_optimized_visualization(image, all_detections_list, output_path):
         draw.rounded_rectangle(background_bbox, fill="black")
 
         # Рисуем номер
-        draw.text((text_x, text_y), str(i), fill='white', font=font_regular)
+        draw.text((text_x, text_y), str(current_id), fill='white', font=font_regular)
         
         # Отладочная информация (если включена)
         if VISUALIZATION_SETTINGS["show_debug_info"]:
@@ -147,6 +150,8 @@ def create_optimized_visualization(image, all_detections_list, output_path):
             debug_y = y2 + 5
             if debug_y + 15 < image.height:
                 draw.text((x1, debug_y), debug_text, fill=color, font=font_regular)
+        
+        current_id += 1
     
     # Сохраняем изображение
     draw_image.save(output_path)
@@ -260,17 +265,18 @@ def merge_overlapping_boxes(all_detections, iou_threshold=FILTER_SETTINGS["iou_t
     
     return merged_detections
 
-def export_detections_to_json(all_detections_list, output_path):
+#start_id=1 -значение по умолчанию, но заменяется передаваемым в функцию?
+def export_detections_to_json(all_detections_list, output_path, start_id=1):
     """Экспортирует информацию о bbox в JSON"""
     export_data = {
         "timestamp": datetime.now().isoformat(),
         "total_detections": len(all_detections_list),
         "detections": []
     }
-    
+    current_id = start_id
     for i, det in enumerate(all_detections_list, 1):
         detection_info = {
-            "id": i,
+            "id": current_id,   # используем глобальный счетчик вместо локального
             "label": det['label'],
             "score": det['score'],
             "coordinates": {
@@ -287,20 +293,22 @@ def export_detections_to_json(all_detections_list, output_path):
             }
         }
         export_data["detections"].append(detection_info)
-    
+        current_id += 1
+
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(export_data, f, indent=2, ensure_ascii=False)
     
     return export_data
 
-def export_detections_to_text(all_detections_list, output_path):
+def export_detections_to_text(all_detections_list, output_path, start_id=1):
     """Экспортирует информацию в читаемый текстовый формат"""
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write("ПРОНУМЕРОВАННЫЕ BBOX ОБЪЕКТЫ\n")
         f.write("=" * 50 + "\n\n")
         
+        current_id = start_id
         for i, det in enumerate(all_detections_list, 1):
-            f.write(f"ОБЪЕКТ #{i}:\n")
+            f.write(f"ОБЪЕКТ #{current_id}:\n")
             f.write(f"  Метка: {det['label']}\n")
             f.write(f"  Уверенность: {det['score']:.3f}\n")
             f.write(f"  Координаты: [{det['box'][0]:.1f}, {det['box'][1]:.1f}, {det['box'][2]:.1f}, {det['box'][3]:.1f}]\n")
@@ -308,9 +316,10 @@ def export_detections_to_text(all_detections_list, output_path):
             f.write(f"  Высота: {det['box'][3] - det['box'][1]:.1f}px\n")
             f.write(f"  Центр: ({((det['box'][0] + det['box'][2]) / 2):.1f}, {((det['box'][1] + det['box'][3]) / 2):.1f})\n")
             f.write("-" * 30 + "\n")
+            current_id += 1
 
 # ====== ОСНОВНОЙ КОД С ВЫБОРОМ СТИЛЯ ВИЗУАЛИЗАЦИИ ======
-def main_owl(model_path, image_path, text_queries, output_path):
+def main_owl(model_path, image_path, text_queries, output_path, start_id=1):
     # Загрузка модели и обработка изображения (код из предыдущего примера)
     model_path = model_path
     
@@ -390,14 +399,14 @@ def main_owl(model_path, image_path, text_queries, output_path):
     
     # 1. Основная визуализация с выбранной позицией
     main_image_path = os.path.join(output_dir, f"{base_name}_optimized_bbox.jpg")
-    create_optimized_visualization(original_image, final_detections, main_image_path)
+    create_optimized_visualization(original_image, final_detections, main_image_path, start_id)
 
     # 2. Экспорт данных
     json_path = os.path.join(output_dir, f"{base_name}_bbox_data.json")
-    export_detections_to_json(final_detections, json_path)
+    export_detections_to_json(final_detections, json_path, start_id)
     
     txt_path = os.path.join(output_dir, f"{base_name}_bbox_data.txt") 
-    export_detections_to_text(final_detections, txt_path)
+    export_detections_to_text(final_detections, txt_path, start_id)
     
     print(f"\n📁 Результаты сохранены:")
     print(f"   🎯 Основная визуализация: {main_image_path}")
@@ -410,6 +419,7 @@ def main_owl(model_path, image_path, text_queries, output_path):
             'txt_path': txt_path,
             'detection_count': len(final_detections),
             'image_size': image.size,
+            'next_start_id': start_id + len(final_detections)
     }
 
 if __name__ == "__main__":
@@ -451,5 +461,6 @@ if __name__ == "__main__":
         model_path=TEST_MODEL_PATH,
         image_path=TEST_IMAGE_PATH,
         text_queries=TEST_QUERIES,
-        output_path = TEST_OUTPUT_PATH
+        output_path = TEST_OUTPUT_PATH,
+        start_id=1
     )
