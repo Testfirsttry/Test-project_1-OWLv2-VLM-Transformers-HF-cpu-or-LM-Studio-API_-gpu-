@@ -145,9 +145,11 @@ vlm_result = vlm.describe_multiple_images(
 )
 
 if vlm_result.get("success"): # Неявная передача значения. cработает если success == True
+     print("Время обработки:", vlm_result["processing_time"])
      print("Позиция после обработки:", vlm_result["output_text"])
 else:
      print("Ошибка:", vlm_result.get("error", "API EROR"))
      sys.exit("Eror API LM Studio")   
 
 vlm_Tine_to_run=vlm_result["processing_time"]
+
