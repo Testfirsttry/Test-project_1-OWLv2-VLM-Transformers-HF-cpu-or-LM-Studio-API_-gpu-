@@ -6,6 +6,7 @@ import time
 import sys
 import json
 from typing import List, Dict, Tuple, Optional
+import re
 
 class DesktopObjectDetector:
      def __init__(self, project_root: Optional[Path] = None):
@@ -28,7 +29,7 @@ class DesktopObjectDetector:
           #["menu bar", "title bar", "status bar", "scroll bar"],
           #["file explorer", "folder icon", "document icon"],
           #["notification area", "search bar", "address bar"]
-          ["blue icon", "green icon", "red icon", "yellow icon"],                     #доп для обнаружения
+          #["blue icon", "green icon", "red icon", "yellow icon"],                     #доп для обнаружения
           #["small square icon", "large rectangular window", "thin horizontal bar"],   #доп
           #["everything visible", "all UI elements", "all clickable items"],           #доп
           #["text label", "title bar text", "menu text"]                               #доп
@@ -143,71 +144,106 @@ class DesktopObjectDetector:
           from API_LM_studio.Localhost_LM_studio_PIL_image import LMStudioVLM
           vlm = LMStudioVLM()
                
-          vlm_result = vlm.describe_multiple_images(
+          vlm_result_all = vlm.describe_multiple_images(
                     image_inputs=image_parts,
                     prompt=query_text,
           )
           
           # cработает если success == True
-          if vlm_result.get("success"):
+          if vlm_result_all.get("success"):
                return {
                     "method": "lm_studio",
-                    "output_text": vlm_result["output_text"],
-                    "processing_time": vlm_result["processing_time"],
-                    "raw_result": vlm_result
+                    "output_text": vlm_result_all["output_text"],
+                    "processing_time": vlm_result_all["processing_time"],
+                    "raw_result": vlm_result_all
                }
           else: 
                return {
-                    "error": vlm_result.get("error", "Ошибка API")
+                    "error": vlm_result_all.get("error", "Ошибка API")
                }
 
     
      def extract_object_positions(self, analysis_text: str) -> Dict[int, int]:
-          """Извлекает id bbox объектов из текста анализа"""        
+          """Извлекает id bbox объектов из текста анализа"""
+          #возвращает по одному (1) ID на позицию (формат 1: 12, 2: 7)
           positions = {}
-        
-          # Ищет строки в формате "1: [number]" или "1: number"
-          for line in analysis_text.split('\n'):
+
+          # Убирает лишние пробелы и разделяем на строки
+          lines = analysis_text.strip().split('\n')
+          
+          for line in lines:
+               line = line.strip()
+               # Пропуск пустых строк
+               if not line:
+                    continue
+               # поиск строки, которые выглядят как "X: Y" где X - номер, Y - число или список
                if ':' in line:
                     try:
-                         parts = line.split(':')
-                         if len(parts) >= 2:
-                              question_num = int(''.join(filter(str.isdigit, parts[0])))
-                              numbers = ''.join(filter(str.isdigit, parts[1]))
-                         if numbers:
-                              object_id = int(numbers)
+                         # Разделяем на номер вопроса и значение
+                         question_part, value_part = line.split(':', 1)
+                         
+                         # Извлечение номер вопроса (берем только цифры)
+                         question_match = re.search(r'\d+', question_part)
+                         if not question_match:
+                              continue
+                              
+                         question_num = int(question_match.group())
+                         
+                         # Извлечение ID объекта - несколько вариантов формата
+                         # Форматы: "1: 123", "1: [123]", "1: [123, 456]", "ID 1: 123"
+                         
+                         # Убираем квадратные скобки если есть
+                         value_part = value_part.replace('[', '').replace(']', '').strip()
+                         
+                         # Ищем первое число в значении
+                         value_match = re.search(r'\d+', value_part)
+                         if value_match:
+                              object_id = int(value_match.group())
+                              #прямое присвоение элемента к словарю
                               positions[question_num] = object_id
                               print(f"✅ Вопрос {question_num}: объект ID {object_id}")
-                    except (ValueError, IndexError):
+                              #print("positions результаты",positions)
+                         else:
+                              print(f"⚠️ Не удалось извлечь ID из строки: {line}")
+                              
+                    except (ValueError, IndexError, AttributeError) as e:
+                         print(f"❌ Ошибка обработки строки '{line}': {e}")
                          continue
+          
           return positions
      
      def print_final_results(self, results: Dict):
-          """Выводит итоговые результаты"""
-          print("\n" + "=" * 60)
-          print("🎯 ИТОГОВЫЕ РЕЗУЛЬТАТЫ")
-          print("=" * 60)
+        """Выводит итоговые результаты"""
+        print("\n" + "=" * 60)
+        print("🎯 ИТОГОВЫЕ РЕЗУЛЬТАТЫ")
+        print("=" * 60)
           
-          # Информация об анализе
-          analysis = results["analysis_result"]
-          print(f"🔧 Метод анализа: {results['analysis_method']}")
-          print(f"⏱️ Время обработки: {analysis['processing_time']:.2f} сек")
+        # Информация об анализе
+        analysis = results["vlm_result_all"]
+        print(f"🔧 Метод анализа: {results['analysis_method']}")
+        print(f"⏱️ Время обработки: {analysis['processing_time']:.2f} сек")
           
-          print(f"\n📝 Ответ VLM:\n{analysis['output_text']}")
+        print(f"\n📝 Ответ VLM:\n{analysis['output_text']}")
                
-          # Позиции объектов
-          positions = results["object_positions"]
-          if positions:
-               print("\n📍 Найденные позиции:")
-               for question_num, object_id in positions.items():
-                    obj_name = "Корзина" if question_num == 1 else "Браузер"
-                    print(f"  {obj_name} (вопрос {question_num}): ID {object_id}")
-          else:
-               print("\n❌ Не удалось определить позиции объектов")
+        # Позиции объектов
+        positions = results["object_positions"]
+        input_items = results["input_items"]
+        if positions:
+            print("\n📍 Найденные позиции:")
+            for question_num in sorted(positions.keys()):
+                object_id = positions[question_num]
+                obj_name = f"Объект {question_num}"
+                if question_num - 1 < len(input_items):
+                     obj_name = input_items[question_num - 1]
+                
+                print(f"  {obj_name} (вопрос {question_num}): ID {object_id}")
+        else:
+            print("\n❌ Не удалось определить позиции объектов")
           
-          # Информация о детекциях
-          total_detections = sum(result['detection_count'] for result in results["owl_results"])
-          print(f"\n📊 Всего обнаружено объектов: {total_detections}")
+        # Информация о детекциях
+        total_detections = sum(result['detection_count'] for result in results["owl_results"])
+        print(f"\n📊 Всего обнаружено объектов: {total_detections}")
+    
     
      def get_detection_by_id(self, owl_results: List[Dict], object_id: int) -> Optional[Dict]:
           """Находит детекцию по ID во всех результатах OWLv2"""
@@ -218,7 +254,6 @@ class DesktopObjectDetector:
                for detection in data['detections']:
                     if detection['id'] == object_id:
                          return detection
-        
           return None
     
      def get_coordinates_for_click(self, detection: Dict) -> Tuple[float, float]:
@@ -228,10 +263,17 @@ class DesktopObjectDetector:
           center_y = (coords['y1'] + coords['y2']) / 2
           return center_x, center_y
     
+
+      #------------------------#
+     ### Основной цикл работы ##
+      #-----------------------#
      def run_full_pipeline(self, analysis_method: str = "transformers", 
                            show_math_plot_fig = "show",
                            show_final_results="show",
-                           ) -> Dict:
+                           input_items=None) -> Dict:
+          if input_items is None:
+               input_items = ["Trash can/recycle bin", "Web browser"]
+     
           """Запускает полный пайплайн обработки"""
           print("=" * 60)
           print("Start")
@@ -254,44 +296,82 @@ class DesktopObjectDetector:
                self.show_all_parts_with_names(image_parts, "Части для анализа Qwen 3 VL")
           
           # 6. Текстовый запрос для анализа
-          query_text = f'''There are photos in front of you - screenshots with positions.
-               Answer these questions about the NUMBERED elements:
+          # Формируем шаблон ответа
+          questions = "\n".join([
+          f"{i+1}. {item.replace('_', ' ')} - which NUMBER?" 
+          for i, item in enumerate(input_items)
+          ])
 
-               1. Trash can/recycle bin - which NUMBER?
-               2. Web browser - which NUMBER?
+          result_template = "\n".join([
+          f"{i+1}: [number]" 
+          for i in range(len(input_items))
+          ])
 
-               ANSWER FORMAT:
-               Answer preparation: [text with analysis about the positions of objects]
+          query_text = f'''There are photos in front of you - screenshots with numbered elements.
+            Answer these questions about the numbered objects:
 
-               Final result:
-               1: [number]
-               2: [number]
-               Use 0 if not found. Only numbers from the image.'''
+            {questions}
+
+            ANSWER FORMAT:
+            Answer preparation: [Concise analysis of object positions and numbers]
+            Final result:
+            {result_template}
+
+            Rules:
+            - Use 0 if object not found
+            - Only use numbers explicitly visible in the screenshot
+            - No additional text after the final result'''
+
+          print(query_text)
         
-          # 7. Анализ с выбранным методом
+          # 7. выбор метода анализа и передача частей изображения + запроса текстом
           if analysis_method == "transformers":
-               analysis_result = self.analyze_with_transformers(image_parts, query_text)
+               vlm_result_all = self.analyze_with_transformers(image_parts, query_text)
+               """return{
+                    "method": "transformers",
+                    "output_text": qwen3_result["output_qwen3_text"],
+                    "processing_time": qwen3_result["generation_time"],
+                    "raw_result": qwen3_result}"""
+               
           elif analysis_method == "lm_studio":
-               analysis_result = self.analyze_with_lm_studio(image_parts, query_text)
+               vlm_result_all = self.analyze_with_lm_studio(image_parts, query_text)
+               """return{
+                    "method": "lm_studio",
+                    "output_text": vlm_result_all["output_text"],
+                    "processing_time": vlm_result_all["processing_time"],
+                    "raw_result": vlm_result_all}"""
+          
           else:
                raise ValueError("Неверный метод анализа. Выберите 'transformers' или 'lm_studio'")
           
           # 8. Извлечение id bbox объектов
           object_id = {}
-          #if analysis_result["success"]: # по умолчанию True
-          object_id = self.extract_object_positions(analysis_result["output_text"])
+          object_id = self.extract_object_positions(vlm_result_all["output_text"])
           
           # 9. Формируем итоговый результат
           final_result = {
                "screenshot_path": screenshot_path,
                "split_images": [left_path, right_path],
                "owl_results": owl_results,
-               "image_parts": image_parts,
-               "analysis_result": analysis_result,
-               "object_positions": object_id,
-               "analysis_method": analysis_method
+               "image_parts": image_parts,        
+
+               "vlm_result_all": vlm_result_all, # все данные после analyze_with (7 пункт)
+                              """ что выходит из vlm_result_all
+                                   vlm_result_all = return{
+                                        "method": "lm_studio",
+                                        "output_text": vlm_result_all["output_text"],
+                                        "processing_time": vlm_result_all["processing_time"],
+                                        "raw_result": vlm_result_all}
+                              """
+               #кривой запрос "VLM_output_text": vlm_result_all['output_text'], #текстовое описание VLM
+               #кривой запрос "VLM_processing_time": vlm_result_all['processing_time'], # время обработки VLM
+
+               "object_positions": object_id, # словарь c id и номером запроса {1: 12, 2: 7}
+               "analysis_method": analysis_method, #transformers или lm_studio
+               "input_items": input_items #входной набор объектов
           }
-        
+
+          print("LLLLLLLLF\n", final_result["vlm_result_all"]['output_text'],"\nLLLLLLLLF\n")
           # 10. Вывод результатов
           if show_final_results == "show":
                self.print_final_results(final_result)
@@ -305,4 +385,7 @@ if __name__ == "__main__":
      detector = DesktopObjectDetector()
 
      #detector.run_full_pipeline("transformers")
-     detector.run_full_pipeline("lm_studio")
+     a=detector.run_full_pipeline("lm_studio",
+                                show_math_plot_fig = "hide",
+                                show_final_results = "show")
+     #print(a)
