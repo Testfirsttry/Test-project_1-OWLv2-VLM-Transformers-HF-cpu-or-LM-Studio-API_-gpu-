@@ -29,9 +29,9 @@ class DesktopObjectDetector:
           #["menu bar", "title bar", "status bar", "scroll bar"],
           #["file explorer", "folder icon", "document icon"],
           #["notification area", "search bar", "address bar"]
-          #["blue icon", "green icon", "red icon", "yellow icon"],                     #доп для обнаружения
+          ["blue icon", "green icon", "red icon", "yellow icon"],                     #доп для обнаружения
           #["small square icon", "large rectangular window", "thin horizontal bar"],   #доп
-          #["everything visible", "all UI elements", "all clickable items"],           #доп
+          ["everything visible", "all UI elements", "all clickable items"],           #доп
           #["text label", "title bar text", "menu text"]                               #доп
         ]
         
@@ -315,12 +315,7 @@ class DesktopObjectDetector:
             ANSWER FORMAT:
             Answer preparation: [Concise analysis of object positions and numbers]
             Final result:
-            {result_template}
-
-            Rules:
-            - Use 0 if object not found
-            - Only use numbers explicitly visible in the screenshot
-            - No additional text after the final result'''
+            {result_template}'''
 
           print(query_text)
         
@@ -356,22 +351,19 @@ class DesktopObjectDetector:
                "image_parts": image_parts,        
 
                "vlm_result_all": vlm_result_all, # все данные после analyze_with (7 пункт)
-                              """ что выходит из vlm_result_all
-                                   vlm_result_all = return{
-                                        "method": "lm_studio",
-                                        "output_text": vlm_result_all["output_text"],
-                                        "processing_time": vlm_result_all["processing_time"],
-                                        "raw_result": vlm_result_all}
-                              """
-               #кривой запрос "VLM_output_text": vlm_result_all['output_text'], #текстовое описание VLM
-               #кривой запрос "VLM_processing_time": vlm_result_all['processing_time'], # время обработки VLM
-
                "object_positions": object_id, # словарь c id и номером запроса {1: 12, 2: 7}
                "analysis_method": analysis_method, #transformers или lm_studio
-               "input_items": input_items #входной набор объектов
+               "input_items": input_items, #входной набор объектов
+               "VLM_output_text": vlm_result_all['output_text'], #текстовое описание VLM
+               "VLM_processing_time": vlm_result_all['processing_time'], # время обработки VLM
+                              # что выходит из vlm_result_all
+                              #     vlm_result_all = return{
+                              #          "method": "lm_studio",
+                              #          "output_text": vlm_result_all["output_text"],
+                              #          "processing_time": vlm_result_all["processing_time"],
+                              #          "raw_result": vlm_result_all}
           }
 
-          print("LLLLLLLLF\n", final_result["vlm_result_all"]['output_text'],"\nLLLLLLLLF\n")
           # 10. Вывод результатов
           if show_final_results == "show":
                self.print_final_results(final_result)
@@ -385,7 +377,6 @@ if __name__ == "__main__":
      detector = DesktopObjectDetector()
 
      #detector.run_full_pipeline("transformers")
-     a=detector.run_full_pipeline("lm_studio",
+     detector.run_full_pipeline("lm_studio",
                                 show_math_plot_fig = "hide",
                                 show_final_results = "show")
-     #print(a)
