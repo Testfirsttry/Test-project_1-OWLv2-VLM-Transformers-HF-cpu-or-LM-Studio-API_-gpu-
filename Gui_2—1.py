@@ -30,6 +30,7 @@ class DesktopAssistantGUI:
         
         # Переменные
         self.analysis_result = None
+        self.object_input=None
         self.object_positions = {}  # question_id -> object_id
         self.screen_coordinates = {}  # object_id -> (x, y)
         self.VLM_text_results = None
@@ -174,11 +175,12 @@ class DesktopAssistantGUI:
         
         self.log("🚀 Запуск анализа...", "INFO")
         if object_list == None:
+            object_list=["Trash can/recycle bin", "Web browser"]
             self.log(f"""Стандартные объекты:
-"Trash can/recycle bin", "Web browser"
+            "Trash can/recycle bin", "Web browser""", "SUCCESS")
                  
-Для выбора иных объектов:
-Введите Find "Trash can", "Web browser", "Notepad" """)
+            self.log(f"""Для выбора иных объектов:
+            Введите Find 'Trash can', 'Web browser', 'Notepad'""")
         
         # 2. Запуск в ДВУХ (2) отдельных потоках 1)Анализа и 2)временной "Прозрачности"
 
@@ -196,7 +198,7 @@ class DesktopAssistantGUI:
     def make_transparent_for_screenshot(self):
         """Делает окно прозрачным на короткое время для скриншота"""
 
-        self.root.after(0, lambda: self.root.wm_attributes("-alpha", 0.1))
+        self.root.after(0, lambda: self.root.wm_attributes("-alpha", 0.05))
         time.sleep(1.5)  
         self.root.after(0, lambda: self.root.wm_attributes("-alpha", 1.0))
         time.sleep(1.1)
@@ -204,13 +206,16 @@ class DesktopAssistantGUI:
     def run_analysis_thread(self, object_list=None):
         """Запускает анализ в отдельном потоке управления"""
         try:
-            object_list= object_list
-            if object_list!= None:
-                self.log(f"\n Выбранные объекты: {object_list}", "INFO")
+            self.object_input= object_list
+
+            #print("object_list",self.object_input)
+            #print("object_list_ТИП",type(self.object_input))
+            if self.object_input!= None:
+                self.log(f"\n Выбранные объекты: {self.object_input}", "INFO")
+
             # 1. получение информации о выборе метода "transformers / LM_srtudio"
             method = self.method_var.get()
             self.log(f"\n🔧 Выбран метод: {method}", "INFO")
-            
             
             # 2. Создаем экземпляр детектора
             detector = DesktopObjectDetector()
@@ -219,34 +224,34 @@ class DesktopAssistantGUI:
             result = detector.run_full_pipeline(analysis_method=method,
                                                 show_math_plot_fig = "show",
                                                 show_final_results="show",
-                                                input_items=object_list
+                                                input_items=self.object_input
                                                 )
             """
-#что выходит из run_full_pipeline
+            #что выходит из run_full_pipeline
 
-run_full_pipeline = final_result = {
-               "screenshot_path": screenshot_path,
-               "split_images": [left_path, right_path],
-               "owl_results": owl_results,
-               "image_parts": image_parts,        
+            run_full_pipeline = final_result = {
+                        "screenshot_path": screenshot_path,
+                        "split_images": [left_path, right_path],
+                        "owl_results": owl_results,
+                        "image_parts": image_parts,        
 
-               "vlm_result_all": vlm_result_all, # все данные после analyze_with (7 пункт)
-               
-                        #что выходит из vlm_result_all
-                        vlm_result_all= return{
-                                        "method": "lm_studio",
-                                        "output_text": vlm_result_all["output_text"],
-                                        "processing_time": vlm_result_all["processing_time"],
-                                        "raw_result": vlm_result_all}
+                        "vlm_result_all": vlm_result_all, # все данные после analyze_with (7 пункт)
+                        
+                                    #что выходит из vlm_result_all
+                                    vlm_result_all= return{
+                                                    "method": "lm_studio",
+                                                    "output_text": vlm_result_all["output_text"],
+                                                    "processing_time": vlm_result_all["processing_time"],
+                                                    "raw_result": vlm_result_all}
 
-               # не работает, похоже на кривое обращение"VLM_output_text": vlm_result_all['output_text'], #текстовое описание VLM
-               # тоже не"VLM_processing_time": vlm_result_all['processing_time'], # время обработки VLM
+                        # не работает, похоже на кривое обращение"VLM_output_text": vlm_result_all['output_text'], #текстовое описание VLM
+                        # тоже не"VLM_processing_time": vlm_result_all['processing_time'], # время обработки VLM
 
-               "object_positions": object_id, # словарь c id и номером запроса {1: 12, 2: 7}
-               "analysis_method": analysis_method, #transformers или lm_studio
-               "input_items": input_items #входной набор объектов
-               }
-            """
+                        "object_positions": object_id, # словарь c id и номером запроса {1: 12, 2: 7}
+                        "analysis_method": analysis_method, #transformers или lm_studio
+                        "input_items": input_items #входной набор объектов
+                        }
+                        """
             
             self.log("\n✅ Анализ завершен!", "SUCCESS")
 
@@ -254,18 +259,21 @@ run_full_pipeline = final_result = {
             self.analysis_result = result
             
             # Получение ID обьектов из ответа
-            time_vlm=result["vlm_result_all"]['processing_time']
-            self.log(f"\n⏱️ Время обработки VLM: {time_vlm}")
+            #time_vlm=result["vlm_result_all"]['processing_time']
+            time_vlm=result["VLM_processing_time"]
+            self.log(f"\n⏱️ Время обработки VLM: {time_vlm:.02f}")
 
             total_detections = sum(count['detection_count'] for count in result["owl_results"])
             self.log(f"\n📊 Всего обнаружено объектов: {total_detections}")
 
-            self.object_positions = result["object_positions"] # словарь c id и номером запроса {1: 12, 2: 7}
-            self.log(f"\n📍 Найдены объекты: {self.object_positions}") 
+            #self.object_positions = result.get("object_positions", {})
+            #словарь c id и номером запроса {1: 12, 2: 7}
+            self.object_positions= result["object_positions"]
+            self.log(f"\n📍 Найденные позиции объектов: \n{self.object_positions}", "SUCCESS") 
 
-            self.VLM_text_results = result["vlm_result_all"]['output_text']
+            self.VLM_text_results = result["VLM_output_text"]
             print("VLM_text_results", self.VLM_text_results)
-            self.log(f"\n📝 Ответ VLM: {self.VLM_text_results}")
+            self.log(f"\n📝 Ответ VLM: \n{self.VLM_text_results}")
 
             # Включаем кнопки после анализа
             self.analyze_btn.config(state=tk.NORMAL)
@@ -276,8 +284,13 @@ run_full_pipeline = final_result = {
             if self.object_positions:
                 self.log(" Найденные объекты:", "INFO")
                 for q_id, obj_id in self.object_positions.items():
-                    obj_name = "Корзина" if q_id == 1 else "Браузер"
+                    # Безопасное получение названия из списка
+                    if 1 <= q_id <= len(self.object_input):
+                        obj_name = self.object_input[q_id - 1]  # Индексация с 0
+                    else:
+                        obj_name = f"Объект {q_id}"  # Запасной вариант
                     self.log(f"  {obj_name}: ID {obj_id}", "SUCCESS")
+            
             
         except Exception as e:
             self.log(f"❌ Ошибка анализа: {str(e)}", "ERROR")
@@ -289,136 +302,49 @@ run_full_pipeline = final_result = {
             self.root.wm_attributes("-alpha", 1.0)
 
     
-    def highlight_object(self,object_id):
+    def highlight_object(self):
         """Подсвечивает найденный объект ID -> json -> координаты"""
 
         # 1. получение id из полученных ранее в def start_analysis()
-        object_id = object_id #словарь c id и номером запроса {1: 12, 2: 7}
+        object_id_list = self.object_positions #словарь c id и номером запроса {1: 12, 2: 7}
+        if not object_id_list:
+            self.log("Нет координат для подсветки", "WARNING")
+            return
         
         # 2. Создаем экземпляр класса для интеракции
         highlight = DesktopInteraction()
 
         # 3. по номерам передача ID, и параметра - 1)подсветки и 2)клика по области
-        for object in object_id():
-            highlight.process_object(object_id = object,
-                                    highlight="show",
-                                    сlick_on_object="hide")
-
-        if not self.object_id:
-            self.log("Нет координат для подсветки", "WARNING")
-            return
-        
-        """
-        # Закрываем предыдущее окно подсветки
-        if self.highlight_window:
+        for query_number, obj_id in object_id_list.items():
             try:
-                self.highlight_window.destroy()
-            except:
-                pass
-        
-        # Создаем окно подсветки для первого объекта
-        obj_id = list(self.object_positions.values())[0]
-        coords = self.screen_coordinates.get(obj_id)
-        
-        if coords:
-            self.create_highlight_window(coords, obj_id)
-        """
-        """
-    def create_highlight_window(self, coords, obj_id):
-        #Создает окно для подсветки объекта (через matplotlib)
-        try:
-            import matplotlib.pyplot as plt
-            import matplotlib.patches as patches
-            
-            x, y = coords
-            
-            # Создаем фигуру
-            fig, ax = plt.subplots(figsize=(4, 4))
-            fig.patch.set_alpha(0.7)  # Прозрачный фон
-            
-            # Рисуем круг
-            circle = patches.Circle((0.5, 0.5), 0.4, 
-                                   facecolor='red', 
-                                   alpha=0.5,
-                                   edgecolor='yellow',
-                                   linewidth=3)
-            ax.add_patch(circle)
-            
-            # Добавляем текст
-            ax.text(0.5, 0.5, f'ID: {obj_id}', 
-                   ha='center', va='center', 
-                   fontsize=14, fontweight='bold',
-                   color='white')
-            
-            # Настраиваем вид
-            ax.set_xlim(0, 1)
-            ax.set_ylim(0, 1)
-            ax.axis('off')
-            
-            # Позиционируем окно рядом с объектом
-            plt.get_current_fig_manager().window.wm_geometry(f"+{int(x)}+{int(y-100)}")
-            plt.get_current_fig_manager().window.attributes('-topmost', True)
-            
-            # Сохраняем ссылку на окно
-            self.highlight_window = plt
-            
-            self.log(f"✨ Подсветка объекта {obj_id} на ({x:.0f}, {y:.0f})", "SUCCESS")
-            
-            # Автоматически закрываем через 3 секунды
-            self.root.after(3000, lambda: plt.close() if plt else None)
-            
-            plt.show(block=False)
-            
-        except ImportError:
-            # Альтернатива без matplotlib - простое окно tkinter
-            self.create_simple_highlight(coords, obj_id)
-    
-    def create_simple_highlight(self, coords, obj_id):
-        #Простая подсветка через tkinter
-        x, y = coords
-        
-        # Создаем окно поверх всех окон
-        highlight = tk.Toplevel(self.root)
-        highlight.overrideredirect(True)
-        highlight.attributes('-topmost', True)
-        highlight.attributes('-alpha', 0.7)
-        
-        # Красный круг
-        highlight.configure(bg='red')
-        
-        # Размер и позиция
-        size = 100
-        highlight.geometry(f"{size}x{size}+{int(x-size/2)}+{int(y-size/2)}")
-        
-        # Метка с ID
-        label = tk.Label(highlight, text=f"ID: {obj_id}", 
-                        bg='red', fg='white',
-                        font=('Arial', 12, 'bold'))
-        label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        
-        self.highlight_window = highlight
-        
-        # Автозакрытие
-        self.root.after(3000, highlight.destroy)
-"""
+                highlight.process_object(object_id = obj_id,
+                                    highlight="show",
+                                    click_on_object="hide")
+                self.log(f"Успешно обработан объект {obj_id} (запрос {query_number})", "SUCCESS")
+            except Exception as e:
+                self.log(f"Ошибка при обработке объекта {obj_id}: {e}", "ERROR")
+
     def click_object(self):
         """Кликает по найденному объекту ID -> json -> координаты"""
 
         # 1. получение id из полученных ранее в def start_analysis()
-        object_id = object_id #словарь c id и номером запроса {1: 12, 2: 7}
+        object_id_list = self.object_positions #словарь c id и номером запроса {1: 12, 2: 7}
+        if not object_id_list:
+            self.log("Нет координат для Клика", "WARNING")
+            return
         
         # 2. Создаем экземпляр класса для интеракции
         highlight = DesktopInteraction()
 
         # 3. по номерам передача ID, и параметра - 1)подсветки и 2)клика по области
-        for object in object_id():
-            highlight.process_object(object_id = object,
-                                    highlight="show", #оставлю подсветка для наглядности места клика
-                                    сlick_on_object="show")
-
-        if not self.object_id:
-            self.log("Нет координат для подсветки", "WARNING")
-            return
+        for query_number, obj_id in object_id_list.items():
+            try:
+                highlight.process_object(object_id = obj_id,
+                                    highlight="show",
+                                    click_on_object="show")
+                self.log(f"Успешно обработан объект {obj_id} (запрос {query_number})", "SUCCESS")
+            except Exception as e:
+                self.log(f"Ошибка при обработке объекта {obj_id}: {e}", "ERROR")
 
     def toggle_window_visibility(self):
         #Переключает видимость окна, за счет сравнения значения transparency_level
@@ -491,9 +417,8 @@ clear - очистить окно log
 hide - переключить видимость окна 
                                    
 start_analysis - начать анализ
-start_analysis Trash can, Web browser            
-или              
-start_analysis "Trash can", "Web browser", "Notepad" - для поиска определенных объектов
+
+Find "Trash can", "Web browser", "Notepad" - для поиска определенных объектов
                                   
 click [ID] - где id номер обнаруженного объекта""")
         
