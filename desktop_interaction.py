@@ -111,8 +111,16 @@ class DesktopInteraction:
             # Автоматическое закрытие
             window.after(duration * 2000, window.destroy)
             
-            # Запускаем окно
-            window.mainloop()
+                    # ЗАМЕНА: update вместо mainloop
+            window.update()
+            
+            # Пауза для показа (не блокирующая)
+            start_time = time.time()
+            while time.time() - start_time < duration:
+                window.update()
+                time.sleep(0.1)
+            
+            window.destroy()
             
             print(f"✨ Подсвечена область: ({x1:.0f}, {y1:.0f}) - ({x2:.0f}, {y2:.0f})")
             
@@ -132,7 +140,7 @@ class DesktopInteraction:
             # Перемещаем и кликаем
             pyautogui.moveTo(x, y, duration=0.5)
             time.sleep(0.2)
-            pyautogui.click()
+            pyautogui.doubleClick()
             print(f"✅ Клик по координатам: ({x:.0f}, {y:.0f})")
         else:
             print(f"❌ Координаты вне экрана: ({x:.0f}, {y:.0f})")
@@ -142,7 +150,7 @@ class DesktopInteraction:
      #-----------------#
     # Основная функция #
     #-----------------#
-    def process_object(self, object_id: int, highlight="show", сlick_on_object="show"):
+    def process_object(self, object_id: int, highlight="show", click_on_object="show"):
         """
         Основной метод: находит, подсвечивает и кликает по объекту
         """
@@ -172,7 +180,7 @@ class DesktopInteraction:
         time.sleep(0.5)
         
         # 5. Кликаем по центру
-        if сlick_on_object == "show":
+        if click_on_object == "show":
             self.click_center(obj)
     
     def run_demo(self):
