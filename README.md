@@ -93,6 +93,10 @@ https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct/tree/main
    Localhost_LM_studio_PIL_image.py (для теста)
    main_owlv2_API_LM_studio.py (для использования с новыми скриншотами)
 
+### 6. Запуск GUI - графический интерфейс пользователя
+1. Установить PyAutoGUI через pip install pyautogui (для клика по области или подсветки)
+2. запустить файл Gui_2—1.py
+ 
 ## Текущий статус
 
  **Реализовано:**
@@ -138,6 +142,10 @@ desktop-object-detector/
 │
 ├── main_owlv2_transformers.py                # Основной скрипт (для OWLv2 + Transformers)
 ├── main_owlv2_lmstudio.py                    # Основной скрипт (для OWLv2 + LM Studio)
+│
+├── Gui_2—1.py                                # Файл графического интерфейса пользователя
+├── desktop_interaction.py                    # файл для обработки запросов PyAutoGUI и подсветка через tkinter
+│
 ├── requirements.txt                          # Зависимости Python
 └── README.md                                 # Этот файл
 ```
@@ -149,8 +157,8 @@ desktop-object-detector/
 - [x] Два режима работы (CPU/GPU)
 
 ### Фаза 2 (ближайшее)
-- [ ] Добавить GUI на Tkinter/PyQt
-- [ ] Интеграция PyAutoGUI
+- [x] Добавить GUI на Tkinter/PyQt
+- [x] Интеграция PyAutoGUI
 - [ ] Поддержка hotkeys?
 
 **Благодарности**
