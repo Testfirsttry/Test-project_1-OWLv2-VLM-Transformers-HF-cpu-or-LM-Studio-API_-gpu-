@@ -14,7 +14,8 @@ Figure 2 - LM Studio (CPU Qwen 3 VL 4b Q8_0)
 <img width="1011" height="730" alt="{FED1A0DE-62FE-4113-9112-B8B83C737499}" src="https://github.com/user-attachments/assets/1f4a20f4-142e-405b-b7d9-687236a58251" />
 
 Figure 3 - Graphical user interface (GUI)
-(Buttons from left to right: 1. Analysis, 2. Highlighting of found UI objects, 3. Clicking (+highlighting) on ​​a found UI object, 4. Increasing transparency)
+(Buttons from left to right: 
+1. Analysis, 2. Highlighting of found UI objects, 3. Clicking (+highlighting) on ​​a found UI object, 4. Increasing transparency, 5. Selecting an analysis method (Transformers / Lm Studio) )
 
 Проект использует каскад из двух нейросетевых моделей:
 1. **OWLv2** - детектирует объекты на скриншоте и присваивает им ID
