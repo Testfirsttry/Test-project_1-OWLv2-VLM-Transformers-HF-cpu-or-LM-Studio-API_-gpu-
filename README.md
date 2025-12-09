@@ -16,7 +16,6 @@ Figure 2 - LM Studio (CPU Qwen 3 VL 4b Q8_0)
 Figure 3 - Graphical user interface (GUI)
 (Buttons from left to right: 
 1. Analysis, 2. Highlighting of found UI objects, 3. Clicking (+highlighting) on ​​a found UI object, 4. Increasing transparency, 5. Selecting an analysis method (Transformers / Lm Studio)
-   
 The very bottom is the command entry line (to view commands, enter Help).
 
 Проект использует каскад из двух нейросетевых моделей:
