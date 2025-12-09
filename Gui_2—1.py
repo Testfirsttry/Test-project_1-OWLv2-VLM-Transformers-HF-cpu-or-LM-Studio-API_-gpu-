@@ -37,8 +37,9 @@ class DesktopAssistantGUI:
         self.highlight_window = None
         
         # Настройка прозрачности
-        self.transparency_level = 1.0
-        
+        self.transparency_level = 0.9
+        self.root.wm_attributes("-alpha", self.transparency_level)
+
         # Создаем интерфейс
         self.create_widgets()
         
@@ -200,7 +201,7 @@ class DesktopAssistantGUI:
 
         self.root.after(0, lambda: self.root.wm_attributes("-alpha", 0.05))
         time.sleep(1.5)  
-        self.root.after(0, lambda: self.root.wm_attributes("-alpha", 1.0))
+        self.root.after(0, lambda: self.root.wm_attributes("-alpha", 0.9))
         time.sleep(1.1)
 
     def run_analysis_thread(self, object_list=None):
@@ -299,7 +300,7 @@ class DesktopAssistantGUI:
             self.analyze_btn.config(state=tk.NORMAL)
             
             # Восстанавливаем окно в случае ошибки
-            self.root.wm_attributes("-alpha", 1.0)
+            self.root.wm_attributes("-alpha", 0.9)
 
     
     def highlight_object(self):
@@ -348,15 +349,15 @@ class DesktopAssistantGUI:
 
     def toggle_window_visibility(self):
         #Переключает видимость окна, за счет сравнения значения transparency_level
-        if self.transparency_level == 1.0:
+        if self.transparency_level == 0.9:
             # Делаем окно прозрачным
-            self.transparency_level = 0.3
+            self.transparency_level = 0.2
             self.root.wm_attributes("-alpha", self.transparency_level)
             self.hide_btn.config(text="👁️ Показать окно")
             self.log("Окно стало полупрозрачным", "INFO")
         else:
             # Восстанавливаем видимость
-            self.transparency_level = 1.0
+            self.transparency_level = 0.9
             self.root.wm_attributes("-alpha", self.transparency_level)
             self.hide_btn.config(text="👁️ Скрыть окно")
             self.log("Окно восстановлено", "INFO")
